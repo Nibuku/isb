@@ -1,80 +1,69 @@
 import os
-import re
-import json
 import logging
-from сaesar_cipher import open_file, write_data
+from open_save_part import open_file, write_data, dict_save
 
 
 logging.basicConfig(level=logging.INFO)
 
-FREQ = " ОИЕАНТСРВМЛДЯКПЗЫЬУЧЖГХФЙЮБЦШЩЭЪ"
 
-
-def get_dict(path: str, new_path) -> dict:
+def get_dict(path: str, new_path: str) -> dict:
     data = open_file(path)
     my_dict = dict()
     for i in data:
         my_dict[i] = round((data.count(i) / len(data)), 5)
     sorted_dict = dict(sorted(my_dict.items(), key=lambda x: x[1], reverse=True))
-    with open(new_path, "w", encoding="utf-16") as convert_file:
-        convert_file.write("Частотный анализ символов в закодированном тексте\n")
-        for key, value in sorted_dict.items():
-            convert_file.write(f"{key}:{value}\n")
+    dict_save(
+        sorted_dict, new_path, "Частотный анализ символов в закодированном тексте\n"
+    )
     return sorted_dict
+
+
+def decoding(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> str:
+    data = data.replace(old, new)
+    dict[old] = new
+    dict_save(dict, path_for_dict, "Ключ\n")
+    return data
 
 
 if __name__ == "__main__":
 
     dictionary = get_dict(
-        os.path.join("lab_1", "task2_one.txt"), os.path.join("lab_1", "task2_key.txt")
+        os.path.join("lab_1", "task2", "code4.txt"),
+        os.path.join("lab_1", "task2", "freq.txt"),
     )
-    print(dictionary)
 
-    # my_dict = dict(enumerate(FREQ, start=1))
-    # freq_dict = dict(zip(my_dict.values(), my_dict.keys()))
-    # first_key = dict(zip(dictionary.keys(), freq_dict.keys()))
     key = dict()
-    data = open_file(os.path.join("lab_1", "task2_one.txt"))
-    data = data.replace("М", "*")
-    key["М"] = " "
-    data = data.replace("Х", "н")
-    key["X"] = "н"
-    data = data.replace("4", "а")
-    key["4"] = "a"
-    data = data.replace("У", "л")
-    data = data.replace(" ", "и")
-    data = data.replace("R", "т")
-    data = data.replace("7", "й")
-    data = data.replace("1", "о")
-    data = data.replace("Е", "с")
-    data = data.replace("B", "г")
-    data = data.replace("Д", "р")
-    data = data.replace("Ф", "м")
-    data = data.replace("A", "в")
-    data = data.replace("Р", "з")
-    data = data.replace("8", "к")
-    data = data.replace("А", "ь")
-    data = data.replace("О", "е")
-    data = data.replace("2", "п")
-    data = data.replace("5", "б")
-    data = data.replace("C", "д")
-    data = data.replace("Л", "я")
-    data = data.replace("Ы", "ш")
-    data = data.replace("Й", "х")
-    data = data.replace("П", "ж")
-    data = data.replace("К", "ю")
-    data = data.replace("Ь", "щ")
-    data = data.replace("T", "у")
-    data = data.replace("Б", "э")
-    data = data.replace("И", "ф")
-    # data = data.replace("и", "ч")
-    print(data)
-    # print(key)
-    # print(first_key)
-# Промежуточный вариант:
-# на*сегодняшний*день*существуют*сотни*разлиних*алгоритмов*сжатия
-# *без*потерь*с*адаптивними*и*статиескими*моделями*представления*данних
-# *их*все*можно*разбить*на*непересекающиеся*клаисси*или*семейства*по*способу
-# *кодирования*данних*каждое*семейство*призвано*сжать*текст*определениной*структури
-# *с*определенной*степенью*эффективности*и*бистродействия*в*зависимости*от*того*ито
-# *важнее*в*приложени*скорость*или*коэффиЧиент*сжатияЧ>ент*сжат>я
+    data = open_file(os.path.join("lab_1", "task2", "code4.txt"))
+    data = decoding("М", "*", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Х", "н", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("4", "а", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("У", "л", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding(" ", "и", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("R", "т", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("7", "й", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("1", "о", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Е", "с", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("B", "г", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Д", "р", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Ф", "м", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("A", "в", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Р", "з", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("8", "к", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("А", "ь", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("О", "е", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("2", "п", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("5", "б", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("C", "д", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Л", "я", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Ы", "ш", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Й", "х", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("П", "ж", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("К", "ю", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Ь", "щ", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("T", "у", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Б", "э", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("И", "ф", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("*", " ", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding(">", "и", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    data = decoding("Ч", "ц", data, os.path.join("lab_1", "task2", "keys.txt"), key)
+    write_data(os.path.join("lab_1", "task2", "decoding_text.txt"), data)
