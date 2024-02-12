@@ -55,10 +55,9 @@ def utility(base_path: str, key_path: str, decoded_path: str) -> None:
             dictionary = json.load(file)
         for key, value in dictionary.items():
             data = data.replace(key, value)
-        data = data.replace("_", " ")
         write_data(decoded_path, data)
     except Exception as ex:
-        logging.error(f"Failed to open dictionary: {ex.message}\n{ex.args}\n") 
+        logging.error(f"Failed to open dictionary: {ex.message}\n{ex.args}\n")
 
 
 if __name__ == "__main__":
