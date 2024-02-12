@@ -1,12 +1,11 @@
 import os
-import logging
 from open_save_part import open_file, write_data, dict_save
 
 
-logging.basicConfig(level=logging.INFO)
-
-
-def get_dict(path: str, new_path: str) -> dict:
+def get_dict(path: str, new_path: str) -> None:
+    """Function for doing frequency analysis in the text.
+    path: path to the text
+    new_path: path for save dict"""
     data = open_file(path)
     my_dict = dict()
     for i in data:
@@ -15,10 +14,15 @@ def get_dict(path: str, new_path: str) -> dict:
     dict_save(
         sorted_dict, new_path, "Частотный анализ символов в закодированном тексте\n"
     )
-    return sorted_dict
 
 
 def decoding(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> str:
+    """Function replaces the specified letters in the text and fixes it in the dictionary
+    old: letter to replace
+    new: new letter
+    data: text
+    path_for_dict:path for save dict
+    """
     data = data.replace(old, new)
     dict[old] = new
     dict_save(dict, path_for_dict, "Ключ\n")
