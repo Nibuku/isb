@@ -1,13 +1,18 @@
-import os
 import json
+import logging
+import os
 
 from open_save_part import open_file, write_data, dict_save
 
 
+logging.basicConfig(level=logging.INFO)
+
+
 def get_dict(path: str, new_path: str) -> None:
     """Function for doing frequency analysis in the text.
-    path: path to the text
-    new_path: path for save dict"""
+    parameters:
+        path: path to read the text
+        new_path: path for saving dictionary"""
     data = open_file(path)
     my_dict = dict()
     for i in data:
@@ -17,11 +22,14 @@ def get_dict(path: str, new_path: str) -> None:
 
 
 def decoding(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> str:
-    """Function replaces the specified letters in the text and fixes it in the dictionary
-    old: letter to replace
-    new: new letter
-    data: text
-    path_for_dict:path for save dict
+    """Function replaces the specified letters in the text and fixes it in the dictionary.
+    parameters:
+        old: letter to replace
+        new: new letter
+        data: text
+        path_for_dict:path for save dict
+    returned value:
+        data (str): decoded text
     """
     data = data.replace(old, new)
     dict[old] = new
@@ -30,17 +38,27 @@ def decoding(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> s
 
 
 def utility(base_path: str, key_path: str, decoded_path: str) -> None:
-    data = open_file(base_path)
-    with open(
-        key_path,
-        "r",
-        encoding="utf-8",
-    ) as file:
-        dictionary = json.load(file)
-    for key, value in dictionary.items():
-        data = data.replace(key, value)
-    data = data.replace("_", " ")
-    write_data(decoded_path, data)
+    """Function parses the json file and replaces all key values
+    in the text with values. Saves the received text to a file.
+    parameters:
+        base_path: path to read the encrypted text
+        key_path: path to file to the dictionary with key
+        decoded_path: path to write the decrypted text
+    """
+    try:
+        data = open_file(base_path)
+        with open(
+            key_path,
+            "r",
+            encoding="utf-8",
+        ) as file:
+            dictionary = json.load(file)
+        for key, value in dictionary.items():
+            data = data.replace(key, value)
+        data = data.replace("_", " ")
+        write_data(decoded_path, data)
+    except Exception as ex:
+        logging.error(f"Failed to open dictionary: {ex.message}\n{ex.args}\n") 
 
 
 if __name__ == "__main__":
