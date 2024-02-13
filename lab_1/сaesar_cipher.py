@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 RUS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
 
 
-def codding(path: str, new_path: str, step: int) -> None:
+def encryption(path: str, new_path: str, step: int) -> None:
     """Function takes path to the file to be encrypted,
     second path is path for save, and step with which
     the text will be encoded using the caesar cipher.
@@ -50,7 +50,7 @@ def key_dict(path: str, step: int) -> None:
         logging.error(f"The symbol was not found: {ex.message}\n{ex.args}\n")
 
 
-def decodding(path: str, new_path: str, step: int) -> None:
+def decryption(path: str, new_path: str, step: int) -> None:
     """Function takes path to the file to be decrypted,
     second path is path for save, and step with which
     the text will be decoded using the caesar cipher.
@@ -79,19 +79,19 @@ if __name__ == "__main__":
     with open(os.path.join("lab_1", "settings.json"), "r") as file:
         settings = json.load(file)
 
-    codding(
+    encryption(
         os.path.join(
             settings["directory"], settings["folder1"], settings["given_text"]
         ),
-        os.path.join(settings["directory"], settings["folder1"], settings["coding"]),
+        os.path.join(settings["directory"], settings["folder1"], settings["encryption"]),
         settings["step"],
     )
     key_dict(
         os.path.join(settings["directory"], settings["folder1"], settings["key_file"]),
         settings["step"],
     )
-    decodding(
-        os.path.join(settings["directory"], settings["folder1"], settings["coding"]),
-        os.path.join(settings["directory"], settings["folder1"], settings["decoding"]),
+    decryption(
+        os.path.join(settings["directory"], settings["folder1"], settings["encryption"]),
+        os.path.join(settings["directory"], settings["folder1"], settings["decryption"]),
         settings["step"],
     )

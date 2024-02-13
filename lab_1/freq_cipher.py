@@ -21,7 +21,7 @@ def get_dict(path: str, new_path: str) -> None:
     dict_save(sorted_dict, new_path)
 
 
-def decoding(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> str:
+def decryption(old: str, new: str, data: str, path_for_dict: str, dict: dict) -> str:
     """Function replaces the specified letters in the text and fixes it in the dictionary.
     parameters:
         old: letter to replace
@@ -70,5 +70,7 @@ if __name__ == "__main__":
             settings["directory"], settings["folder2"], settings["original_text"]
         ),
         os.path.join(settings["directory"], settings["folder2"], settings["key_file"]),
-        os.path.join(settings["directory"], settings["folder2"], settings["decoding"]),
+        os.path.join(
+            settings["directory"], settings["folder2"], settings["decryption"]
+        ),
     )
