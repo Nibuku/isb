@@ -12,7 +12,7 @@ class NistTest:
         self.sequence = bit_sequence
         self.len = len(bit_sequence)
 
-    def bitwise_test(self) -> float:
+    def bitwise_test(self) -> bool:
         sum = 0
         for i in self.sequence:
             if int(i) == 1:
@@ -21,9 +21,9 @@ class NistTest:
                 sum -= 1
         sum *= 1 / math.sqrt(self.len)
         p_value = math.erf(sum / math.sqrt(2))
-        return p_value
+        return p_value > 0.01
 
-    def same_bits_test(self):
+    def same_bits_test(self) -> bool:
         counter = 0
         for i in self.sequence:
             counter += int(i)
@@ -38,7 +38,7 @@ class NistTest:
             p_value = math.erf(num / denom)
         else:
             p_value = 0
-        return p_value
+        return p_value > 0.01
 
     def split_bits(self) -> list:
         blocks = []
@@ -66,18 +66,23 @@ class NistTest:
         sorted_dict = dict(sorted(unit_counts.items(), key=lambda x: x[1]))
         return sorted_dict
 
-    def length_test(self, dictionary: dict):
-        pi = dict()
-        pi[1] = 0.2148
-        pi[2] = 0.3672
-        pi[3] = 0.2305
-        pi[4] = 0.1875
-        pi[5] = 0.1445
-        square_x = 0
-        for i, value in dictionary.items():
-            square_x += pow(value - 16 * pi[i], 2) / (16 * pi[i])
-        p_value = scipy.special.gammainc(3 / 2, square_x / 2)
-        return p_value > 0.01
+    def length_test(self, dictionary: dict) -> bool:
+        try:
+            pi = dict()
+            pi[1] = 0.2148
+            pi[2] = 0.3672
+            pi[3] = 0.2305
+            pi[4] = 0.1875
+            pi[5] = 0.1445
+            square_x = 0
+            for i, value in dictionary.items():
+                square_x += pow(value - 16 * pi[i], 2) / (16 * pi[i])
+            p_value = scipy.special.gammainc(3 / 2, square_x / 2)
+            return p_value > 0.01
+        except Exception as ex:
+            logging.error(
+                f"Length of the dictionary is greater than number of pi-constants: {ex.message}\n{ex.args}\n"
+            )
 
 
 if __name__ == "__main__":
