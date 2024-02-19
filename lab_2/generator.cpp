@@ -13,7 +13,7 @@ int generator()
     {
         unsigned long long rand_num = rand() % 32767;
         bool binary_num = rand_num % 2;
-        std::cout << binary_num;
+        cout << binary_num;
     }
     return 0;
 }
