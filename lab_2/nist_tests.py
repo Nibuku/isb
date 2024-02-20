@@ -168,13 +168,13 @@ if __name__ == "__main__":
         seq = json.load(file)
 
     sequence_java = NistTest(seq["java_sequence"])
-    print(sequence_java.bitwise_test())
-    print(sequence_java.same_bits_test())
+    sequence_java.bitwise_test()
+    sequence_java.same_bits_test()
     sequence_java.length_test(
         sequence_java.largest_number_of_units(sequence_java.split_bits())
     )
 
     sequence_c = NistTest(seq["c_sequence"])
-    print(sequence_c.bitwise_test())
-    print(sequence_c.same_bits_test())
+    sequence_c.bitwise_test()
+    sequence_c.same_bits_test()
     sequence_c.length_test(sequence_c.largest_number_of_units(sequence_c.split_bits()))
