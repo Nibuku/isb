@@ -57,7 +57,7 @@ class NistTest:
                 else:
                     sum -= 1
             sum *= 1 / math.sqrt(self.len)
-            p_value = math.erf(sum / math.sqrt(2))
+            p_value = math.erfc(sum / math.sqrt(2))
             return p_value > 0.01
         except Exception as ex:
             logging.error(f"ZeroDivisionError: {ex.message}\n{ex.args}\n")
@@ -81,7 +81,7 @@ class NistTest:
                         v += 1
                 num = abs(v - 2 * self.len * counter * (1 - counter))
                 denom = 2 * math.sqrt(2 * self.len) * counter * (1 - counter)
-                p_value = math.erf(num / denom)
+                p_value = math.erfc(num / denom)
             else:
                 p_value = 0
             return p_value > 0.01
@@ -168,13 +168,13 @@ if __name__ == "__main__":
         seq = json.load(file)
 
     sequence_java = NistTest(seq["java_sequence"])
-    sequence_java.bitwise_test()
-    sequence_java.same_bits_test()
+    print(sequence_java.bitwise_test())
+    print(sequence_java.same_bits_test())
     sequence_java.length_test(
         sequence_java.largest_number_of_units(sequence_java.split_bits())
     )
 
     sequence_c = NistTest(seq["c_sequence"])
-    sequence_c.bitwise_test()
-    sequence_c.same_bits_test()
+    print(sequence_c.bitwise_test())
+    print(sequence_c.same_bits_test())
     sequence_c.length_test(sequence_c.largest_number_of_units(sequence_c.split_bits()))
