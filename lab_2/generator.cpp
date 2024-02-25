@@ -6,6 +6,11 @@
 
 using namespace std;
 
+/**
+ * A function to generate a random bit sequence of length 128.
+ *
+ * @return 0 on success
+ */
 int generator()
 {
     srand(time(0));
@@ -18,6 +23,11 @@ int generator()
     return 0;
 }
 
+/**
+ * Main function to start the program.
+ *
+ * @return 0 on success
+ */
 int main()
 {
     cout << generator();

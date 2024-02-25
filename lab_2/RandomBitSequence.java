@@ -1,9 +1,17 @@
 import java.util.Random;
 
+/**
+ * A class to generate a random bit sequence of length 128.
+ */
 public class RandomBitSequence {
 
     private static final int MAXBIT = 128;
 
+    /**
+     * Main method to generate and print a random bit sequence.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(String[] args) {
         Random rand = new Random(System.currentTimeMillis());
 

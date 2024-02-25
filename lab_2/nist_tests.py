@@ -5,8 +5,9 @@ import os
 
 import scipy
 
-
 logging.basicConfig(level=logging.INFO)
+
+PI = {1: 0.2148, 2: 0.3672, 3: 0.2305, 4: 0.1875, 5: 0.1445}
 
 
 class NistTest:
@@ -58,7 +59,7 @@ class NistTest:
                     sum -= 1
             sum *= 1 / math.sqrt(self.len)
             p_value = math.erfc(sum / math.sqrt(2))
-            return p_value > 0.01
+            return p_value
         except Exception as ex:
             logging.error(f"ZeroDivisionError: {ex.message}\n{ex.args}\n")
 
@@ -70,9 +71,7 @@ class NistTest:
         bool:true if the p-value is greater than 0.01, False otherwise.
         """
         try:
-            counter = 0
-            for i in self.sequence:
-                counter += int(i)
+            counter = self.sequence.count("1")
             counter *= 1 / self.len
             if abs(counter - 0.5) < 2 / math.sqrt(self.len):
                 v = 0
@@ -84,7 +83,7 @@ class NistTest:
                 p_value = math.erfc(num / denom)
             else:
                 p_value = 0
-            return p_value > 0.01
+            return p_value
         except Exception as ex:
             logging.error(f"ZeroDivisionError: {ex.message}\n{ex.args}\n")
 
@@ -96,7 +95,7 @@ class NistTest:
         list:list of integers representing the split bits.
         """
         blocks = []
-        quantity = (self.len // 8) * 8
+        quantity = self.len - (self.len % 8)
         for i in range(0, quantity, 8):
             block = self.sequence[i : i + 8]
             blocks.append(block)
@@ -145,17 +144,11 @@ class NistTest:
         bool:true if the p-value is greater than 0.01, False otherwise.
         """
         try:
-            pi = dict()
-            pi[1] = 0.2148
-            pi[2] = 0.3672
-            pi[3] = 0.2305
-            pi[4] = 0.1875
-            pi[5] = 0.1445
             square_x = 0
             for i, value in dictionary.items():
-                square_x += pow(value - 16 * pi[i], 2) / (16 * pi[i])
+                square_x += pow(value - 16 * PI[i], 2) / (16 * PI[i])
             p_value = scipy.special.gammainc(3 / 2, square_x / 2)
-            return p_value > 0.01
+            return p_value
         except Exception as ex:
             logging.error(
                 f"Length of the dictionary is longer than number of pi-constants: {ex.message}\n{ex.args}\n"
