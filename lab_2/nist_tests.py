@@ -43,12 +43,12 @@ class NistTest:
         self.sequence = bit_sequence
         self.len = len(bit_sequence)
 
-    def bitwise_test(self) -> bool:
+    def bitwise_test(self) -> float:
         """
         Performs the bitwise test on the sequence of bits.
 
         returns:
-        bool:true if the p-value is greater than 0.01, False otherwise.
+        float:p-value.
         """
         try:
             sum = 0
@@ -63,12 +63,12 @@ class NistTest:
         except Exception as ex:
             logging.error(f"ZeroDivisionError: {ex.message}\n{ex.args}\n")
 
-    def same_bits_test(self) -> bool:
+    def same_bits_test(self) -> float:
         """
         Performs the same bits test on the sequence of bits.
 
         returns:
-        bool:true if the p-value is greater than 0.01, False otherwise.
+        float:p-value.
         """
         try:
             counter = self.sequence.count("1")
@@ -131,7 +131,7 @@ class NistTest:
         except Exception as ex:
             logging.error(f"TypeError block wasn't str: {ex.message}\n{ex.args}\n")
 
-    def length_test(self, dictionary: dict) -> bool:
+    def length_test(self, dictionary: dict) -> float:
         """
         Performs the length test on the sequence of bits
         using the largest number of units calculated.
@@ -141,7 +141,7 @@ class NistTest:
         largest units of consecutive zeros or ones.
 
         returns:
-        bool:true if the p-value is greater than 0.01, False otherwise.
+        float:p-value.
         """
         try:
             square_x = 0
