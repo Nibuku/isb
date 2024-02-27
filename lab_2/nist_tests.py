@@ -3,11 +3,11 @@ import logging
 import math
 import os
 
-import scipy
+import mpmath
 
 logging.basicConfig(level=logging.INFO)
 
-PI = {1: 0.2148, 2: 0.3672, 3: 0.2305, 4: 0.1875, 5: 0.1445}
+PI = {1: 0.2148, 2: 0.3672, 3: 0.2305, 4: 0.1875}
 
 
 class NistTest:
@@ -57,7 +57,7 @@ class NistTest:
                     sum += 1
                 else:
                     sum -= 1
-            sum *= 1 / math.sqrt(self.len)
+            sum = math.fabs(sum) / math.sqrt(self.len)
             p_value = math.erfc(sum / math.sqrt(2))
             return p_value
         except Exception as ex:
@@ -76,7 +76,7 @@ class NistTest:
             if abs(counter - 0.5) < 2 / math.sqrt(self.len):
                 v = 0
                 for i in range(self.len - 1):
-                    if float(i) != float(i + 1):
+                    if self.sequence[i] != self.sequence[i + 1]:
                         v += 1
                 num = abs(v - 2 * self.len * counter * (1 - counter))
                 denom = 2 * math.sqrt(2 * self.len) * counter * (1 - counter)
@@ -120,6 +120,8 @@ class NistTest:
                     if int(i) == 1:
                         counter += 1
                         max_counter = max(max_counter, counter)
+                        if max_counter > 4:
+                            max_counter = 4
                     else:
                         counter = 0
                 if max_counter in unit_counts:
@@ -147,7 +149,7 @@ class NistTest:
             square_x = 0
             for i, value in dictionary.items():
                 square_x += pow(value - 16 * PI[i], 2) / (16 * PI[i])
-            p_value = scipy.special.gammainc(3 / 2, square_x / 2)
+            p_value = mpmath.gammainc(3 / 2, square_x / 2)
             return p_value
         except Exception as ex:
             logging.error(
@@ -161,13 +163,18 @@ if __name__ == "__main__":
         seq = json.load(file)
 
     sequence_java = NistTest(seq["java_sequence"])
-    sequence_java.bitwise_test()
-    sequence_java.same_bits_test()
-    sequence_java.length_test(
-        sequence_java.largest_number_of_units(sequence_java.split_bits())
+    print(sequence_java.bitwise_test())
+    print(sequence_java.same_bits_test())
+    print(
+        sequence_java.length_test(
+            sequence_java.largest_number_of_units(sequence_java.split_bits())
+        )
     )
-
     sequence_c = NistTest(seq["c_sequence"])
-    sequence_c.bitwise_test()
-    sequence_c.same_bits_test()
-    sequence_c.length_test(sequence_c.largest_number_of_units(sequence_c.split_bits()))
+    print(sequence_c.bitwise_test())
+    print(sequence_c.same_bits_test())
+    print(
+        sequence_c.length_test(
+            sequence_c.largest_number_of_units(sequence_c.split_bits())
+        )
+    )
