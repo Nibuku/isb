@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
             self.cryptography.decryption(encryption_text, new_file)
             QMessageBox.information(None, "Успешно", "Текст расшифрован!")
         except Exception as ex:
-            logging.error(f"Couldn't encryption text: {ex}\n")
+            logging.error(f"Couldn't encryption text:{ex.message}\n{ex.args}\n")
 
 
 if __name__ == "__main__":
