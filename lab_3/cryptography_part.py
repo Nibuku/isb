@@ -1,9 +1,13 @@
 import os
 import logging
+
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import serialization, asymmetric, hashes, padding
+from cryptography.hazmat.primitives import serialization, padding
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+from open_save_part import write_data, read_file
+from symmetric import encrypt_decrypt, Action
 
 
 logging.basicConfig(level=logging.INFO)
@@ -40,46 +44,25 @@ class Cryptograthy:
         symmetric_key = os.urandom(self.key_size)
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         public_key = private_key.public_key()
-        try:
-            with open(self.public_key, "wb") as public_out:
-                public_out.write(
-                    public_key.public_bytes(
-                        encoding=serialization.Encoding.PEM,
-                        format=serialization.PublicFormat.SubjectPublicKeyInfo,
-                    )
-                )
-        except Exception as ex:
-            logging.error(
-                f"Error serializing the public key to a file: {ex.message}\n{ex.args}\n"
-            )
-        try:
-            with open(self.private_key, "wb") as private_out:
-                private_out.write(
-                    private_key.private_bytes(
-                        encoding=serialization.Encoding.PEM,
-                        format=serialization.PrivateFormat.TraditionalOpenSSL,
-                        encryption_algorithm=serialization.NoEncryption(),
-                    )
-                )
-        except Exception as ex:
-            logging.error(
-                f"Error serializing the private key to a file: {ex.message}\n{ex.args}\n"
-            )
-        encrypted_symmetric_key = public_key.encrypt(
-            symmetric_key,
-            asymmetric.padding.OAEP(
-                mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None,
+        write_data(
+            self.public_key,
+            public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
             ),
         )
-        try:
-            with open(self.symmetric_key, "wb") as key_file:
-                key_file.write(encrypted_symmetric_key)
-        except Exception as ex:
-            logging.error(
-                f"Error serializing the symmetric key to a file: {ex.message}\n{ex.args}\n"
-            )
+        write_data(
+            self.private_key,
+            private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption(),
+            ),
+        )
+        encrypted_symmetric_key = encrypt_decrypt(
+            public_key, symmetric_key, Action.ENCRYPT
+        )
+        write_data(self.symmetric_key, encrypted_symmetric_key)
 
     def encryption(self, text_file_path: str, encryption_file_path: str) -> None:
         """parameters:
@@ -89,34 +72,11 @@ class Cryptograthy:
             2.1. Decrypt the symmetric key.
             2.2. Encrypt the text using a symmetric algorithm and save it along the specified path.
         """
-        try:
-            with open(self.symmetric_key, mode="rb") as key_file:
-                sym_key = key_file.read()
-        except Exception as ex:
-            logging.error(
-                f"Error deserelizations the symmetric key: {ex.message}\n{ex.args}\n"
-            )
-        try:
-            with open(self.private_key, "rb") as pem_in:
-                pr_key = pem_in.read()
-        except Exception as ex:
-            logging.error(
-                f"Error deserelizations the private key: {ex.message}\n{ex.args}\n"
-            )
+        sym_key = read_file(self.symmetric_key)
+        pr_key = read_file(self.private_key)
         private_key = load_pem_private_key(pr_key, password=None)
-        symmetric_key = private_key.decrypt(
-            sym_key,
-            asymmetric.padding.OAEP(
-                mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None,
-            ),
-        )
-        try:
-            with open(text_file_path, "rb") as f:
-                data = f.read()
-        except Exception as ex:
-            logging.error(f"File reading error: {ex.message}\n{ex.args}\n")
+        symmetric_key = encrypt_decrypt(private_key, sym_key, Action.DECRYPT)
+        data = read_file(text_file_path)
         padder = padding.PKCS7(self.key_size * 8).padder()
         padded_text = padder.update(data) + padder.finalize()
         iv = os.urandom(self.key_size)
@@ -124,11 +84,7 @@ class Cryptograthy:
         encryptor = cipher.encryptor()
         encrypted_data = encryptor.update(padded_text) + encryptor.finalize()
         encrypted_data = iv + encrypted_data
-        try:
-            with open(encryption_file_path, "wb") as f:
-                f.write(encrypted_data)
-        except Exception as ex:
-            logging.error(f"File writing error: {ex.message}\n{ex.args}\n")
+        write_data(encryption_file_path, encrypted_data)
 
     def decryption(self, encryption_file_path: str, decryption_file_path: str) -> None:
         """parameters:
@@ -138,34 +94,11 @@ class Cryptograthy:
             3.1. Decrypt the symmetric key.
             3.2. Decrypt the text using a symmetric algorithm and save it along the specified path.
         """
-        try:
-            with open(self.symmetric_key, mode="rb") as key_file:
-                sym_key = key_file.read()
-        except Exception as ex:
-            logging.error(
-                f"Error deserelizations the symmetric key: {ex.message}\n{ex.args}\n"
-            )
-        try:
-            with open(self.private_key, "rb") as pem_in:
-                pr_key = pem_in.read()
-        except Exception as ex:
-            logging.error(
-                f"Error deserelizations the private key: {ex.message}\n{ex.args}\n"
-            )
+        sym_key = read_file(self.symmetric_key)
+        pr_key = read_file(self.private_key)
         private_key = load_pem_private_key(pr_key, password=None)
-        symmetric_key = private_key.decrypt(
-            sym_key,
-            asymmetric.padding.OAEP(
-                mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None,
-            ),
-        )
-        try:
-            with open(encryption_file_path, "rb") as f:
-                encrypted_data = f.read()
-        except Exception as ex:
-            logging.error(f"File reading error: {ex.message}\n{ex.args}\n")
+        symmetric_key = encrypt_decrypt(private_key, sym_key, Action.DECRYPT)
+        encrypted_data = read_file(encryption_file_path)
         iv = encrypted_data[: self.key_size]
         encrypted_data = encrypted_data[self.key_size :]
         cipher = Cipher(algorithms.TripleDES(symmetric_key), modes.CBC(iv))
@@ -173,8 +106,4 @@ class Cryptograthy:
         data = decryptor.update(encrypted_data) + decryptor.finalize()
         unpadder = padding.PKCS7(self.key_size * 8).unpadder()
         data = unpadder.update(data) + unpadder.finalize()
-        try:
-            with open(decryption_file_path, "wb") as f:
-                f.write(data)
-        except Exception as e:
-            logging.error(f"File writing error: {ex.message}\n{ex.args}\n")
+        write_data(decryption_file_path, data)

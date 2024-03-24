@@ -1,5 +1,6 @@
 import sys
 import logging
+
 from PyQt6.QtCore import QSize
 from PyQt6.QtWidgets import (
     QApplication,
@@ -12,6 +13,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QGridLayout,
 )
+
 import cryptography_part as cp
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +21,7 @@ logging.basicConfig(level=logging.INFO)
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
+        """Initialize the main window with buttons and layouts"""
         super().__init__()
 
         self.setGeometry(400, 100, 500, 500)
@@ -53,7 +56,7 @@ class MainWindow(QMainWindow):
         self.btn_decryption = self.add_button("Расшифровать текст", 250, 40)
         self.go_to_exit = self.add_button("Выйти из программы", 150, 40)
 
-        # делаем виджеты адаптивными по размер окна
+        # делаем виджеты адаптивными под размер окна
         button_layout.addWidget(self.comboBox)
         button_layout.addWidget(self.btn_generation_key)
         button_layout.addWidget(self.btn_encryption)
