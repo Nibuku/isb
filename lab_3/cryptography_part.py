@@ -1,5 +1,4 @@
 import os
-import logging
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -8,9 +7,6 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from open_save_part import write_data, read_file
 from symmetric import encrypt_decrypt, Action
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 class Cryptograthy:
