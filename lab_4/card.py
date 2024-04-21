@@ -3,18 +3,17 @@ import logging
 import json
 import os
 import time
+import numpy as np
 import matplotlib.pyplot as plt
 from functional_part import CardParametrs
 
 logging.basicConfig(level=logging.INFO)
 
 
-def number_selection(
-    save_path: str, hash_str: str, last_numbers: str, bins: list, pool_count: float
-):
+def number_selection(save_path: str, hash_str: str, last_numbers: str, bins: list):
     found_numbers = list()
     my_card = CardParametrs(hash_str, last_numbers, bins)
-    with mp.Pool(int(mp.cpu_count() * pool_count)) as p:
+    with mp.Pool(mp.cpu_count()) as p:
         results = p.starmap(my_card.number_check, [(i,) for i in range(0, 999999)])
         for result in results:
             if result is not None:
@@ -38,26 +37,40 @@ def luna(card_number: str) -> bool:
     return check_sum == check
 
 
-def graph(
-    save_path: str, hash_str: str, last_numbers: str, bins: list, pool_count: float
-):
-    pool_counts = [i for i in range(1, int(mp.cpu_count() * pool_count), 2)]
-    times = list()
-    for i in range(1, int(mp.cpu_count() * pool_count), 2):
+def graph(hash_str: str, last_numbers: str, bins: list):
+    """Функция для рисования графика"""
+    times = np.empty(shape=0)
+    my_card = CardParametrs(hash_str, last_numbers, bins)
+    for i in range(1, int(mp.cpu_count() * 1.5)):
         start = time.time()
-        number_selection(save_path, hash_str, last_numbers, bins, i)
-        end = time.time() - start
-        times.append(end / 60)
-    plt.plot(pool_counts, time)
-    plt.plot(pool_counts, time, color="rose", marker="o", markersize=7)
-    plt.bar(pool_counts, time, alpha=0.5)
+        with mp.Pool(i) as p:
+            for i, result in enumerate(
+                p.starmap(my_card.number_check, [(i,) for i in range(0, 999999)])
+            ):
+                if result:
+                    end = time.time() - start
+                    times = np.append(times, end)
+                    break
+    plt.plot(range(len(times)), np.round(times, 2).tolist())
+    plt.plot(range(len(times)), np.round(times, 2).tolist())
+    plt.plot(
+        range(len(times)),
+        np.round(times, 2).tolist(),
+        color="pink",
+        marker="o",
+        markersize=7,
+    )
+    plt.bar(range(len(times)), np.round(times, 2).tolist(), alpha=0.5)
     plt.xlabel("Количество процессов")
-    plt.ylabel("Затраченное время в минутах")
+    plt.ylabel("Затраченное время в секундах")
     plt.title("График зависимости времени от числа процессов")
+    plt.show()
     plt.show()
 
 
 if __name__ == "__main__":
     with open(os.path.join("lab_4", "constance.json"), "r") as file:
         const = json.load(file)
-    number_selection("lab_4/card_number.json", const["HASH"], "1217", const["BINS"], 1)
+    graph(const["HASH"], "1217", const["BINS"])
+
+# * pool_count
