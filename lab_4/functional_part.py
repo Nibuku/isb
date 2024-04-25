@@ -1,15 +1,27 @@
-import multiprocessing as mp
-import logging
 import json
-import os
-import time
+import logging
 import matplotlib.pyplot as plt
+import multiprocessing as mp
+import time
+
 from class_card import CardParametrs
 
 logging.basicConfig(level=logging.INFO)
 
 
-def number_selection(save_path: str, hash_str: str, last_numbers: str, bins: list):
+def number_selection(
+    save_path: str, hash_str: str, last_numbers: str, bins: list
+) -> None:
+    """
+    Search for credit card numbers, by hash, and save them to a file.
+    The function uses multiple processes to reduce the search time.
+
+    param:
+        save_path (str): The path to save the file.
+        hash_str (str): A hash string for hashes of card numbers.
+        last_numbers (str): The last digits of the card number.
+        bin (list): A list of bins ) for generating card numbers.
+    """
     found_numbers = list()
     my_card = CardParametrs(hash_str, last_numbers, bins)
     with mp.Pool(mp.cpu_count()) as p:
@@ -18,13 +30,21 @@ def number_selection(save_path: str, hash_str: str, last_numbers: str, bins: lis
             if result is not None:
                 found_numbers.append(result)
     try:
-        with open(save_path, "a", encoding="utf-8") as fp:
+        with open(save_path, "w", encoding="utf-8") as fp:
             json.dump({"card_numbers": found_numbers}, fp)
     except Exception as ex:
         logging.error(f"Failed to save dictionary: {ex}\n")
 
 
 def luna(card_number: str) -> bool:
+    """
+    Checking the credit card number using the Moon algorithm.
+
+    param:
+    card_number (str): The credit card number.
+    return:
+    bool: The result of the check
+    """
     check = int(card_number[-1])
     card_number = [int(i) for i in card_number]
     for i in range(1, len(card_number), 2):
@@ -36,7 +56,15 @@ def luna(card_number: str) -> bool:
     return check_sum == check
 
 
-def graph(hash_str: str, last_numbers: str, bins: list):
+def graph(hash_str: str, last_numbers: str, bins: list) -> None:
+    """
+    Creating a graph of time dependence on the number of processes when searching for card numbers.
+
+    param:
+    hash_str (str): Hash for comparing hash numbers of cards.
+    last_numbers (str): The last digits of the card number.
+    bin (list): A list of BIN's for generating card numbers.
+    """
     times = []
     my_card = CardParametrs(hash_str, last_numbers, bins)
     for i in range(1, int(mp.cpu_count() * 1.5)):
@@ -63,9 +91,3 @@ def graph(hash_str: str, last_numbers: str, bins: list):
     plt.ylabel("Затраченное время в секундах")
     plt.title("График зависимости времени от числа процессов")
     plt.show()
-
-
-if __name__ == "__main__":
-    with open(os.path.join("lab_4", "constance.json"), "r") as file:
-        const = json.load(file)
-    graph(const["HASH"], "1217", const["BINS"])

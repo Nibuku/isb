@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QMessageBox,
-    QComboBox,
+    QHBoxLayout,
     QFileDialog,
     QVBoxLayout,
     QWidget,
@@ -27,9 +27,11 @@ class MainWindow(QMainWindow):
         """Initialize the main window with buttons and layouts"""
         super().__init__()
 
-        self.setGeometry(400, 100, 500, 500)
+        self.setGeometry(500, 50, 600, 500)
+        self.setAutoFillBackground(True)
         main_widget = QWidget()
         button_layout = QVBoxLayout()
+        data_layout = QHBoxLayout()
         layout = QGridLayout()
 
         self.setWindowTitle("Поиск и проверка номера карты по хэшу")
@@ -38,33 +40,28 @@ class MainWindow(QMainWindow):
         self.btn_hash_card = QLineEdit(placeholderText="Введите хэш")
         self.btn_last_number = QLineEdit(placeholderText="Введите последние 4 цифры")
 
-        self.bins = self.btn_bins.text().split(",")
-        self.hash_card = self.btn_hash_card.text()
-        self.last_number = self.btn_last_number.text()
-        # self.textbox.move(20, 20)
-        # self.textbox.resize(280, 40)
-
         # кнопки
         self.btn_number_search = self.add_button("Найти номер карты по хэшу", 250, 40)
         self.btn_luna = self.add_button("Проверить номер по алгоритму Луна", 250, 40)
         self.btn_graph = self.add_button("Построить граф", 250, 40)
         self.go_to_exit = self.add_button("Выйти из программы", 150, 40)
 
+        self.btn_number_search.clicked.connect(self.check)
+        self.btn_luna.clicked.connect(self.luna_alg)
+        self.btn_graph.clicked.connect(self.graph_draw)
+
         # делаем виджеты адаптивными под размер окна
-        button_layout.addWidget(self.btn_bins)
-        button_layout.addWidget(self.btn_hash_card)
-        button_layout.addWidget(self.btn_last_number)
+        data_layout.addWidget(self.btn_bins)
+        data_layout.addWidget(self.btn_hash_card)
+        data_layout.addWidget(self.btn_last_number)
         button_layout.addWidget(self.btn_number_search)
         button_layout.addWidget(self.btn_luna)
         button_layout.addWidget(self.btn_graph)
         button_layout.addWidget(self.go_to_exit)
-        layout.addLayout(button_layout, 0, 1)
+        layout.addLayout(data_layout, 1, 0)
+        layout.addLayout(button_layout, 0, 0)
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
-
-        self.btn_number_search.clicked.connect(self.check)
-        self.btn_luna.clicked.connect(self.luna_alg)
-        self.btn_graph.clicked.connect(self.graph_draw)
 
         self.show()
 
@@ -80,8 +77,15 @@ class MainWindow(QMainWindow):
         button.setFixedSize(QSize(size_x, size_y))
         return button
 
-    def check(self):
+    def check(self) -> None:
+        """
+        Function uses the data entered by the user
+        and calls the function of matching the card number by hash
+        """
         try:
+            bins = self.btn_bins.text().split(",")
+            hash_card = self.btn_hash_card.text()
+            last_number = self.btn_last_number.text()
             directory = QFileDialog.getSaveFileName(
                 self,
                 "Выберите файл для сохранения найденного номера:",
@@ -89,60 +93,66 @@ class MainWindow(QMainWindow):
                 "JSON File(*.json)",
             )[0]
             if (
-                (self.bins == [])
-                or (self.hash_card == "")
-                or (self.last_number == "")
+                (bins == [])
+                or (hash_card == "")
+                or (last_number == "")
                 or (directory == "")
             ):
                 QMessageBox.information(
                     self,
-                    "Были указаны не все данные карты для поиска номера",
                     "Внимание!",
-                    QMessageBox.StandardButton.Ok,
+                    "Были указаны не все данные карты для поиска номера",
                 )
-                return
-            result = fp.number_selection(
+            fp.number_selection(
                 directory,
-                self.hash_card,
-                int(self.last_number),
-                [int(item) for item in self.bins],
+                hash_card,
+                int(last_number),
+                [int(item) for item in bins],
             )
-            QMessageBox.information(None, "Успешно", f"Номер карты найдет:{result}")
+            QMessageBox.information(None, "Успешно", f"Номер карты найдет")
         except Exception as ex:
-            logging.error(f"Couldn't generation keys: {ex.args}\n")
+            logging.error(f"The card number was not found: {ex.args}\n")
 
-    def luna_alg(self):
+    def luna_alg(self) -> None:
+        """
+        Function calls the function of
+        checking card number using the Moon algorithm
+        """
         try:
             card_number = QInputDialog.getText(
                 self, "Введите номер карты", "Номер карты:"
             )
-            if card_number.text() == "":
+            card_number = card_number[0]
+            if card_number == "":
                 QMessageBox.information(
-                    None, "Введите номер карты!", "Пожалуйста, введите номер карты."
+                    None, "Введите номер карты!", "Номер карты не был введен."
                 )
-                return
             result = fp.luna(card_number)
             QMessageBox.information(
                 None, "Результат проверки", f"Номер карты действителен: {result}"
             )
         except Exception as ex:
-            logging.error(f"Couldn't generation keys: {ex.args}\n")
+            logging.error(f"Error during card number verification: {ex.args}\n")
 
-    def graph_draw(self):
+    def graph_draw(self) -> None:
+        """
+        Function calls the function of plotting
+        time dependence on number of processes
+        """
         try:
-            if (self.bins == "") or (self.hash_card == "") or (self.last_number == ""):
+            bins = self.btn_bins.text().split(",")
+            hash_card = self.btn_hash_card.text()
+            last_number = self.btn_last_number.text()
+            if (bins == "") or (hash_card == "") or (last_number == ""):
                 QMessageBox.information(
                     None,
                     "Были указаны не все данные карты",
                     "Пожалуйста, заполните все данные карты.",
                 )
-                return
-            fp.graph(
-                self.hash_card, int(self.last_number), [int(item) for item in self.bins]
-            )
-            QMessageBox.information(None, "Успешно", "Граф построен")
+            fp.graph(hash_card, int(last_number), [int(item) for item in bins])
+            QMessageBox.information(None, "Успешно", "График построен")
         except Exception as ex:
-            logging.error(f"Couldn't generation keys: {ex.args}\n")
+            logging.error(f"Error during graph creation: {ex.args}\n")
 
 
 if __name__ == "__main__":
