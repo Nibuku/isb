@@ -1,7 +1,4 @@
 import hashlib
-import logging
-
-logging.basicConfig(level=logging.INFO)
 
 
 class CardParametrs:
